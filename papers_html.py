@@ -136,13 +136,15 @@ class MyNCBI:
         <td style="border:0;vertical-align:top">
         <i><b>{journal}</b></i> {year}; {issue}.</td>'''.format(journal=journal, year=year, issue=issue)
 
-        link_tag = self.pubmed.find_elements_by_xpath('//a[contains(@class,"link-item") and contains(@class,"dialog-focus")]')
-        if link_tag:
+        try:
+            link_tag = self.pubmed.find_elements_by_xpath('//a[contains(@class,"link-item") and contains(@class,"dialog-focus")]')
             paper += '''<td style="border:0;text-indent:2pt">
             <a href="{href}"><img src="{src}" style="height:16px" />
             </a></td>'''.format(
                 href=link_tag[0].get_attribute('href'), 
                 src=link_tag[0].find_element_by_tag_name('img').get_attribute('src'))
+        except NoSuchElementException:
+            pass
         paper += '''<td style="border:0;text-indent:3pt">
         <a href="https://pubmed.ncbi.nlm.nih.gov/{pmid}">
         <img style="height:16px" src="//upload.wikimedia.org/wikipedia/commons/thumb/f/fb/US-NLM-PubMed-Logo.svg/200px-US-NLM-PubMed-Logo.svg.png" />
