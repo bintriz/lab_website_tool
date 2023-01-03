@@ -51,52 +51,71 @@ class MyNCBI:
                     year, paper = self.paper_from_pmid(pmid)
                     paper = paper.format(index=index, title=title, author=author)
                 except NoSuchElementException:
-                    year = docsum.find_element_by_xpath('./span[@class="displaydate"]').text[:4]
-                    page = docsum.find_element_by_xpath('./span[@class="page"]').text.rstrip(".")
                     try:
-                        journal = docsum.find_element_by_xpath('./span[@class="journalname"]').text.rstrip(".")
-                        volume = docsum.find_element_by_xpath('./span[@class="volume"]').text
-                        issue = docsum.find_element_by_xpath('./span[@class="issue"]').text
+                        year = docsum.find_element_by_xpath('./span[@class="displaydate"]').text[:4]
+                        page = docsum.find_element_by_xpath('./span[@class="page"]').text.rstrip(".")
+                        try:
+                            journal = docsum.find_element_by_xpath('./span[@class="journalname"]').text.rstrip(".")
+                            volume = docsum.find_element_by_xpath('./span[@class="volume"]').text
+                            issue = docsum.find_element_by_xpath('./span[@class="issue"]').text
                         
+                            paper = '''<li value="{index}" style="font-size:11pt;margin-bottom:5pt">
+                            <div style="color:#1a0dab;font-family:sans-serif;margin-bottom:2pt"><b>{title}</b></div>
+                            <div style="font-family:sans-serif;font-size:small;margin-left:3pt;margin-bottom:2pt">{author}</div>
+                            <div style="font-family:sans-serif;font-size:small">
+                            <table style="border-collpase:collapse;border:0"><tr>
+                            <td style="border:0;vertical-align:top">
+                            <i><b>{journal}</b></i> {year}; {volume}{issue}{page}.</td></tr></table>
+                            </div></li>'''.format(
+                                index=index, 
+                                title=title, 
+                                author=author, 
+                                journal=journal,
+                                year=year, 
+                                volume=volume,
+                                issue=issue,
+                                page=page)
+                        except NoSuchElementException:
+                            editor = docsum.find_element_by_xpath('./span[@class="editors"]').text    
+                            ch_num = docsum.find_element_by_xpath('./span[@class="chapter-details"]').text
+                            ch_title = docsum.find_element_by_xpath('./span[@class="chaptertitle"]').text
+                            publisher = docsum.find_element_by_xpath('./span[@class="book-publisher"]').text
+                        
+                            paper = '''<li value="{index}" style="font-size:11pt;margin-bottom:5pt">
+                            <div style="color:#1a0dab;font-family:sans-serif;margin-bottom:2pt"><b>{ch_title}</b></div>
+                            <div style="font-family:sans-serif;font-size:small;margin-left:3pt;margin-bottom:2pt">{author}</div>
+                            <div style="font-family:sans-serif;font-size:small">
+                            <table style="border-collpase:collapse;border:0">
+                            <tr><td style="border:0;vertical-align:top">In: {title} {editor}</td></tr>
+                            <tr><td style="border:0;vertical-align:top">{publisher} {year}. {ch_num} {page}</td></tr>
+                            </table></div></li>'''.format(
+                                index=index, 
+                                ch_title=ch_title,
+                                author=author,
+                                title=title, 
+                                editor=editor,
+                                publisher=publisher,
+                                year=year, 
+                                ch_num=ch_num,
+                                page=page)
+                    except NoSuchElementException:
+                        tmp = docsum.find_element_by_xpath('./span[@class="confloc"]').text
+                        publisher  = tmp.split("; ")[1]
+                        year = tmp.split("; c")[-1].rstrip(". ")
+
                         paper = '''<li value="{index}" style="font-size:11pt;margin-bottom:5pt">
                         <div style="color:#1a0dab;font-family:sans-serif;margin-bottom:2pt"><b>{title}</b></div>
                         <div style="font-family:sans-serif;font-size:small;margin-left:3pt;margin-bottom:2pt">{author}</div>
                         <div style="font-family:sans-serif;font-size:small">
-                        <table style="border-collpase:collapse;border:0"><tr>
-                        <td style="border:0;vertical-align:top">
-                        <i><b>{journal}</b></i> {year}; {volume}{issue}{page}.</td></tr></table>
-                        </div></li>'''.format(
-                            index=index, 
-                            title=title, 
-                            author=author, 
-                            journal=journal,
-                            year=year, 
-                            volume=volume,
-                            issue=issue,
-                            page=page)
-                    except NoSuchElementException:    
-                        editor = docsum.find_element_by_xpath('./span[@class="editors"]').text    
-                        ch_num = docsum.find_element_by_xpath('./span[@class="chapter-details"]').text
-                        ch_title = docsum.find_element_by_xpath('./span[@class="chaptertitle"]').text
-                        publisher = docsum.find_element_by_xpath('./span[@class="book-publisher"]').text
-                        
-                        paper = '''<li value="{index}" style="font-size:11pt;margin-bottom:5pt">
-                        <div style="color:#1a0dab;font-family:sans-serif;margin-bottom:2pt"><b>{ch_title}</b></div>
-                        <div style="font-family:sans-serif;font-size:small;margin-left:3pt;margin-bottom:2pt">{author}</div>
-                        <div style="font-family:sans-serif;font-size:small">
                         <table style="border-collpase:collapse;border:0">
-                        <tr><td style="border:0;vertical-align:top">In: {title} {editor}</td></tr>
-                        <tr><td style="border:0;vertical-align:top">{publisher} {year}. {ch_num} {page}</td></tr>
+                        <tr><td style="border:0;vertical-align:top">{publisher}; {year}.</td></tr>
                         </table></div></li>'''.format(
                             index=index, 
-                            ch_title=ch_title,
+                            title=title,
                             author=author,
-                            title=title, 
-                            editor=editor,
                             publisher=publisher,
-                            year=year, 
-                            ch_num=ch_num,
-                            page=page)
+                            year=year)
+
 
                 self.papers[year].append(paper)
 
